@@ -1,7 +1,11 @@
 package org.grobid.core.layout;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * Created by zholudev on 18/08/15.
@@ -173,11 +177,11 @@ public class BoundingBox {
             return 0;
         }
     }
-	
+
     public BoundingBox boundingBoxIntersection(BoundingBox b) {
 		if (!this.intersect(b))
 			return null;
-		
+
         double ax1 = this.x;
         double ax2 = this.x2;
         double ay1 = this.y;
@@ -191,25 +195,25 @@ public class BoundingBox {
 		double ix1 = 0.0;
 		if (ax1 > bx1)
 			ix1 = ax1;
-		else 
+		else
 			ix1 = bx1;
-		
+
 		double iy1 = 0.0;
 		if (ay1 > by1)
 			iy1 = ay1;
-		else 
+		else
 			iy1 = by1;
-		
+
 		double ix2 = 0.0;
 		if (ax2 > bx2)
 			ix2 = bx2;
-		else 
+		else
 			ix2 = ax2;
-		
+
 		double iy2 = 0.0;
 		if (ay2 > by2)
 			iy2 = by2;
-		else 
+		else
 			iy2 = ay2;
 
         return fromTwoPoints(page, ix1, iy1, ix2, iy2);
@@ -228,5 +232,43 @@ public class BoundingBox {
         builder.append("\"w\":").append(width).append(", ");
         builder.append("\"h\":").append(height);
         return builder.toString();
+    }
+
+    public void writeJsonProps(JsonGenerator gen) throws IOException {
+        gen.writeNumberField("p", page);
+        gen.writeNumberField("x", x);
+        gen.writeNumberField("y", y);
+        gen.writeNumberField("w", width);
+        gen.writeNumberField("h", height);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BoundingBox)) return false;
+
+        BoundingBox that = (BoundingBox) o;
+
+        if (getPage() != that.getPage()) return false;
+        if (Double.compare(that.getX(), getX()) != 0) return false;
+        if (Double.compare(that.getY(), getY()) != 0) return false;
+        if (Double.compare(that.getWidth(), getWidth()) != 0) return false;
+        return Double.compare(that.getHeight(), getHeight()) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = getPage();
+        temp = Double.doubleToLongBits(getX());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(getY());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(getWidth());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(getHeight());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 }
